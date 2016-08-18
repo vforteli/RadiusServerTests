@@ -4,6 +4,8 @@ using System.Text;
 using Flexinets.Radius;
 using System.Net;
 using System.IO;
+using Flexinets.Radius.Test;
+using System.Reflection;
 
 namespace RadiusServerTests
 {
@@ -11,6 +13,7 @@ namespace RadiusServerTests
     public class RadiusServerTests
     {
         /// <summary>
+        /// Send test packet and verify response packet
         /// Example from https://tools.ietf.org/html/rfc2865
         /// </summary>
         [TestMethod]
@@ -20,37 +23,14 @@ namespace RadiusServerTests
             var expected = "0200002686fe220e7624ba2a1005f6bf9b55e0b20606000000010f06000000000e06c0a80103";
             var secret = "xyzzy5461";
 
-            var path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
             var dictionary = new RadiusDictionary(path);
 
             var rs = new RadiusServer(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1812), dictionary);
-            var response = rs.GetResponsePacket(new MockPacketHandler(), secret, StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
+            var response = rs.GetResponsePacket(new MockPacketHandler(), secret, Utils.StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
             var responseBytes = rs.GetBytes(response);
 
-            Assert.AreEqual(expected, ByteArrayToString(responseBytes));
-        }
-
-
-
-        public byte[] StringToByteArray(String hex)
-        {
-            int NumberChars = hex.Length;
-            byte[] bytes = new byte[NumberChars / 2];
-            for (int i = 0; i < NumberChars; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
-            }
-            return bytes;
-        }
-
-        public string ByteArrayToString(byte[] bytes)
-        {
-            var hex = new StringBuilder(bytes.Length * 2);
-            foreach (byte b in bytes)
-            {
-                hex.AppendFormat("{0:x2}", b);
-            }
-            return hex.ToString();
+            Assert.AreEqual(expected, Utils.ByteArrayToString(responseBytes));
         }
     }
 }
