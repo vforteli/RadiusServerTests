@@ -1,12 +1,10 @@
 ﻿using Flexinets.Radius;
 using Flexinets.Radius.PacketHandlers;
 using FlexinetsDBEF;
-using log4net;
-using log4net.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace RadiusServerTests
@@ -19,7 +17,7 @@ namespace RadiusServerTests
             var _contextFactory = new FlexinetsEntitiesFactory("Data Source=XANADU;Initial Catalog=flexinets;Integrated Security=True");
             var networkProvider = new NetworkProvider(_contextFactory);
             var networkApiClient = new NetworkApiClient(_contextFactory, new WebClientFactory(), networkProvider, "http://localhost:8500/api/networkid/?msisdn=");
-            var networkIdProvider = new NetworkIdProvider(_contextFactory, new DateTimeProvider(), networkProvider, networkApiClient);
+            var networkIdProvider = new NetworkIdProvider(_contextFactory, new DateTimeProvider(), networkApiClient);
             return networkIdProvider;
         }
 
@@ -38,6 +36,20 @@ namespace RadiusServerTests
         {
             var foo = GetNetworkIdProvider(new DateTimeProvider());
             var id = foo.GetNetworkId("43660000001");
+            Assert.AreEqual("24491", id);
+        }
+
+
+        [TestMethod]
+        public void TestNetworkIdSuccessPasswordUpdate()
+        {
+            var _contextFactory = new FlexinetsEntitiesFactory("Data Source=XANADU;Initial Catalog=flexinets;Integrated Security=True");
+            var networkProvider = new NetworkProvider(_contextFactory);
+            var networkApiClient = new NetworkApiClient(_contextFactory, new WebClientFactory(), networkProvider, "http://localhost:8500/api/networkid/?msisdn=");
+            networkApiClient.ApiCredential = new NetworkCredential("hurr", "durr");
+            var networkIdProvider = new NetworkIdProvider(_contextFactory, new DateTimeProvider(), networkApiClient);
+
+            var id = networkIdProvider.GetNetworkId("43660000001");
             Assert.AreEqual("24491", id);
         }
 
@@ -107,7 +119,7 @@ namespace RadiusServerTests
 
             var networkProvider = new NetworkProvider(_contextFactory);
             var networkApiClient = new NetworkApiClient(_contextFactory, clientFactory, networkProvider, "http://localhost:8500/api/networkid/?msisdn=");
-            var _networkIdProvider = new NetworkIdProvider(_contextFactory, dateTimeProvider, networkProvider, networkApiClient);
+            var _networkIdProvider = new NetworkIdProvider(_contextFactory, dateTimeProvider, networkApiClient);
 
             String networkId;
             _networkIdProvider.TryGetNetworkId(failMsisdn, out networkId);
@@ -171,7 +183,7 @@ namespace RadiusServerTests
 
             var networkProvider = new NetworkProvider(_contextFactory);
             var networkApiClient = new NetworkApiClient(_contextFactory, clientFactory, networkProvider, "http://duh");
-            var _networkIdProvider = new NetworkIdProvider(_contextFactory, dateTimeProvider, networkProvider, networkApiClient);
+            var _networkIdProvider = new NetworkIdProvider(_contextFactory, dateTimeProvider, networkApiClient);
 
 
             String networkId;
