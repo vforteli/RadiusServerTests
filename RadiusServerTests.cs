@@ -40,9 +40,55 @@ namespace RadiusServerTests
         /// </summary>
         [TestMethod]
         public void TestStatusServerResponsePacket()
-        {
+        {            
             var request = "0cda00268a54f4686fb394c52866e302185d062350125a665e2e1e8411f3e243822097c84fa3";
             var expected = "02da0014ef0d552a4bf2d693ec2b6fe8b5411d66";
+            var secret = "xyzzy5461";
+
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
+            var dictionary = new RadiusDictionary(path);
+
+            var rs = new RadiusServer(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1812), dictionary);
+            var response = rs.GetResponsePacket(new MockPacketHandler(), secret, Utils.StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
+            var responseBytes = RadiusServer.GetBytes(response, dictionary);
+
+            Assert.AreEqual(expected, Utils.ByteArrayToString(responseBytes));
+        }
+
+
+        /// <summary>
+        /// Send test packet and verify response packet with proxy-state (21053135342105323330)
+        /// Example from https://tools.ietf.org/html/rfc2865
+        /// Modified to include two proxy states at the end
+        /// </summary>
+        [TestMethod]
+        public void TestResponsePacketWithProxyState()
+        {
+            var request = "010000420f403f9473978057bd83d5cb98f4227a01066e656d6f02120dbe708d93d413ce3196e43f782a0aee0406c0a8011005060000000321053135342105323330";   
+            var expected = "02000030acf049cee1a3ed134316e5b3348cdf3c0606000000010f06000000000e06c0a8010321053135342105323330";
+            var secret = "xyzzy5461";
+
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
+            var dictionary = new RadiusDictionary(path);
+
+            var rs = new RadiusServer(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1812), dictionary);
+            var response = rs.GetResponsePacket(new MockPacketHandler(), secret, Utils.StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
+            var responseBytes = RadiusServer.GetBytes(response, dictionary);
+
+            Assert.AreEqual(expected, Utils.ByteArrayToString(responseBytes));
+        }
+
+
+        /// <summary>
+        /// Send test packet and verify response packet with proxy-state (21053135342105323330)
+        /// Example from https://tools.ietf.org/html/rfc2865
+        /// Modified to include two proxy states in the middle
+        /// </summary>
+        [TestMethod]
+        public void TestResponsePacketWithProxyStateMiddle()
+        {
+            var request = "010000420f403f9473978057bd83d5cb98f4227a01066e656d6f02120dbe708d93d413ce3196e43f782a0aee0406c0a8011021053135342105323330050600000003";
+            var expected = "02000030acf049cee1a3ed134316e5b3348cdf3c0606000000010f06000000000e06c0a8010321053135342105323330";
             var secret = "xyzzy5461";
 
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
