@@ -28,7 +28,29 @@ namespace RadiusServerTests
 
             var rs = new RadiusServer(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1812), dictionary);
             var response = rs.GetResponsePacket(new MockPacketHandler(), secret, Utils.StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
-            var responseBytes = rs.GetBytes(response);
+            var responseBytes = RadiusServer.GetBytes(response, dictionary);
+
+            Assert.AreEqual(expected, Utils.ByteArrayToString(responseBytes));
+        }
+
+
+        /// <summary>
+        /// Test status-server response
+        /// Example from https://tools.ietf.org/html/rfc5997#section-6
+        /// </summary>
+        [TestMethod]
+        public void TestStatusServerResponsePacket()
+        {
+            var request = "0cda00268a54f4686fb394c52866e302185d062350125a665e2e1e8411f3e243822097c84fa3";
+            var expected = "02da0014ef0d552a4bf2d693ec2b6fe8b5411d66";
+            var secret = "xyzzy5461";
+
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\dictionary";  // todo hurgh
+            var dictionary = new RadiusDictionary(path);
+
+            var rs = new RadiusServer(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1812), dictionary);
+            var response = rs.GetResponsePacket(new MockPacketHandler(), secret, Utils.StringToByteArray(request), new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1813));
+            var responseBytes = RadiusServer.GetBytes(response, dictionary);
 
             Assert.AreEqual(expected, Utils.ByteArrayToString(responseBytes));
         }
