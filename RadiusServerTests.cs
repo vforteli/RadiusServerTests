@@ -115,7 +115,7 @@ namespace RadiusServerTests
             var dictionary = new RadiusDictionary(path);
 
             var requestPacket = RadiusPacket.ParseRawPacket(Utils.StringToByteArray(request), dictionary, Encoding.ASCII.GetBytes(secret));
-            var bytes = RadiusPacket.GetBytes(requestPacket, dictionary);
+            var bytes = requestPacket.GetBytes(dictionary);
 
             Assert.AreEqual(expected, Utils.ByteArrayToString(bytes));
         }
