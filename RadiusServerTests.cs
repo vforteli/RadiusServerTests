@@ -4,7 +4,6 @@ using System.Text;
 using Flexinets.Radius;
 using System.Net;
 using System.IO;
-using Flexinets.Radius.Test;
 using System.Reflection;
 
 namespace RadiusServerTests
